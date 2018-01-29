@@ -7,6 +7,16 @@ export default {
             initiator: window.location.hash === '#init',
             stream: stream,
             trickle: false,
+            config: {
+                iceServers: [
+                    { url: 'stun4.l.google.com:19302' },
+                    {
+                        url: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                        credential: 'webrct',
+                        username: 'webrtc'
+                    },
+                ]
+            }
         })
         return this.peer
     },

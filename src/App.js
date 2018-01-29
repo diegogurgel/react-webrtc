@@ -7,7 +7,8 @@ class App extends Component {
   constructor(){
     super()
     this.state = {
-      otherId:''
+      otherId:'',
+      myId:'',
     }
   }
   call = (desc) =>{
@@ -16,11 +17,21 @@ class App extends Component {
   textChange = (ev) =>{
     this.setState({ otherId: ev.target.value })
   }
+  updateId = (myId) =>{
+    this.setState({ myId })
+  }
   render() {
     return (
       <div>
-        <Video ref={ref => (this.video = ref)}/>
-        <textarea cols="30" rows="10" onChange={this.textChange}></textarea>
+        <Video ref={ref => (this.video = ref)} updateId={this.updateId}/>
+        <div className="text-area-wrapper">
+          <h3>My Id</h3>
+          <textarea cols="30" rows="10" value={this.state.myId}></textarea>
+        </div>
+        <div className="text-area-wrapper">
+          <h3>Other Id</h3>
+          <textarea cols="30" rows="10" onChange={this.textChange}></textarea>
+        </div>
         <button onClick={this.call}> Call</button>
       </div>
     )

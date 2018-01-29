@@ -21,6 +21,17 @@
 .App-intro {
   font-size: large;
 }
+.text-area-wrapper{
+  margin-right:16px;
+  display: inline-block
+}
+button{
+  display: block;
+  position: relative;
+  float: none;
+
+
+}
 
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }

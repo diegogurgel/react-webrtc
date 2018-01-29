@@ -17,7 +17,7 @@ class Video extends React.Component{
             this.setState({ streamUrl: window.URL.createObjectURL(stream), localStream: stream })
             const peer = videoCall.init(this.state.localStream)
             peer.on('signal', data => {
-                localStorage.setItem('desc', JSON.stringify(data))
+                this.props.updateId(JSON.stringify(data))
             })
             peer.on('stream', stream => {
                 this.setState({ remoteStreamUrl: window.URL.createObjectURL(stream)})

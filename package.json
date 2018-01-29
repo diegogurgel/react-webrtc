@@ -8,6 +8,7 @@
     "react-scripts": "1.1.0",
     "simple-peer": "^8.2.0"
   },
+  "alias":["webrtc-iefabvdapg.now.sh"],
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
