@@ -9,11 +9,11 @@ export default {
             trickle: false,
             config: {
                 iceServers: [
-                    { url: 'stun4.l.google.com:19302' },
+                    { url: 'stun:stun4.l.google.com:19302' },
                     {
-                        url: 'turn:turn.anyfirewall.com:443?transport=tcp',
-                        credential: 'webrct',
-                        username: 'webrtc'
+                        url: 'turn:numb.viagenie.ca',
+                        credential: '12345678',
+                        username: 'hi@diegogurgel.com'
                     },
                 ]
             }
