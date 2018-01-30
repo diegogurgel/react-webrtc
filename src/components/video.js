@@ -21,7 +21,7 @@ class Video extends React.Component{
         const component = this
         this.setState({socket})
 
-        socket.emit('join', {roomId: 'a3b43'})
+        socket.emit('join', {roomId: window.location.hash})
         socket.on('init', ()=>{
             component.setState({ initiator: true})
             this.getUserMedia()
@@ -60,7 +60,11 @@ class Video extends React.Component{
     enter = () => {
         const peer = videoCall.init(this.state.localStream, this.state.initiator)
         peer.on('signal', data => {
-            this.state.socket.emit('signal', data)
+            const signal = {
+                room: window.location.hash,
+                desc: data
+            }
+            this.state.socket.emit('signal', signal)
         })
         peer.on('stream', stream => {
             this.setState({ remoteStreamUrl: window.URL.createObjectURL(stream) })

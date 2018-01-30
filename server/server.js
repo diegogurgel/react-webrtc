@@ -14,13 +14,14 @@ io.on('connection', function (socket) {
             if (sockets.length===2){
                 io.to(data.roomId).emit('ready')
             }else{
+                socket.leave(data.roomId)
                 socket.emit('full')
             }
             
         }
     });
-    socket.on('signal', description => {
-        io.to('a3b43').emit('desc', description)        
+    socket.on('signal', (data) => {
+        io.to(data.room).emit('desc', data.desc)        
     })
     socket.on('disconnect', () => {
         const roomId = Object.keys(socket.adapter.rooms)[0]
