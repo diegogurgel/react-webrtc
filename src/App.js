@@ -24,15 +24,6 @@ class App extends Component {
     return (
       <div>
         <Video ref={ref => (this.video = ref)} updateId={this.updateId}/>
-        <div className="text-area-wrapper">
-          <h3>My Id</h3>
-          <textarea cols="30" rows="10" value={this.state.myId}></textarea>
-        </div>
-        <div className="text-area-wrapper">
-          <h3>Other Id</h3>
-          <textarea cols="30" rows="10" onChange={this.textChange}></textarea>
-        </div>
-        <button onClick={this.call}> Call</button>
       </div>
     )
   }

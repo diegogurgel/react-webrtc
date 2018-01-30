@@ -2,9 +2,9 @@ import Peer from 'simple-peer'
 
 export default {
     peer: null, 
-    init: (stream, remoteVideoElement) => {
+    init: (stream, initiator) => {
         this.peer = new Peer({
-            initiator: window.location.hash === '#init',
+            initiator: initiator,
             stream: stream,
             trickle: false,
             config: {
@@ -21,6 +21,6 @@ export default {
         return this.peer
     },
     connect: (otherId) => {
-        this.peer.signal(JSON.parse(otherId))
+        this.peer.signal(otherId)
     }  
 } 
