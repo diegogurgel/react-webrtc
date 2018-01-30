@@ -17,20 +17,21 @@ class Video extends React.Component{
 
     }
     componentDidMount(){
-        const socket = io('http://localhost:8080')
+        console.log('did mount')
+        const socket = io('https://signaling.now.sh')
         const component = this
         this.setState({socket})
-
-        socket.emit('join', {roomId: window.location.hash})
+        this.getUserMedia().then(() => {
+            socket.emit('join', { roomId: window.location.hash })
+        })
         socket.on('init', ()=>{
             component.setState({ initiator: true})
-            this.getUserMedia()
         })
         socket.on('ready', ()=>{
             console.log('ready initiator?', component.state.initiator)
             if (!component.state.initiator){
-                this.getUserMedia(()=>{
-                    component.enter()    
+                this.getUserMedia().then(() => {
+                    component.enter()
                 })
             }else{
                 component.enter()
@@ -52,10 +53,12 @@ class Video extends React.Component{
 
     }
     getUserMedia(cb){
-        navigator.getUserMedia({ video: true, audio: true }, stream => {
-            this.setState({ streamUrl: window.URL.createObjectURL(stream), localStream: stream })
-            if(cb) cb()
-        }, ()=>{})        
+        return new Promise((resolve, reject) => {
+            navigator.getUserMedia({ video: true, audio: true }, stream => {
+                this.setState({ streamUrl: window.URL.createObjectURL(stream), localStream: stream })
+                resolve()
+            }, () => { }) 
+        })
     }
     enter = () => {
         const peer = videoCall.init(this.state.localStream, this.state.initiator)
