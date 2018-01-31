@@ -17,7 +17,6 @@ class Video extends React.Component{
 
     }
     componentDidMount(){
-        console.log('did mount')
         const socket = io('https://signaling.now.sh')
         const component = this
         this.setState({socket})
@@ -28,7 +27,6 @@ class Video extends React.Component{
             component.setState({ initiator: true})
         })
         socket.on('ready', ()=>{
-            console.log('ready initiator?', component.state.initiator)
             if (!component.state.initiator){
                 this.getUserMedia().then(() => {
                     component.enter()
@@ -54,8 +52,10 @@ class Video extends React.Component{
     }
     getUserMedia(cb){
         return new Promise((resolve, reject) => {
+            navigator.getUserMedia = navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
             navigator.getUserMedia({ video: true, audio: true }, stream => {
-                this.setState({ streamUrl: window.URL.createObjectURL(stream), localStream: stream })
+                this.setState({ streamUrl: stream, localStream: stream })
+                this.localVideo.srcObject = stream
                 resolve()
             }, () => { }) 
         })
@@ -70,7 +70,10 @@ class Video extends React.Component{
             this.state.socket.emit('signal', signal)
         })
         peer.on('stream', stream => {
-            this.setState({ remoteStreamUrl: window.URL.createObjectURL(stream) })
+            this.remoteVideo.srcObject = stream
+        })
+        peer.on('error', function (err) { 
+            console.log(err)
         })
 
     }
@@ -85,8 +88,8 @@ class Video extends React.Component{
     render(){
         return( 
             <div>
-                <video autoPlay id="localVideo" muted src={this.state.streamUrl}></video>
-                <video autoPlay src={this.state.remoteStreamUrl}></video>
+                <video autoPlay id="localVideo" muted ref={video => (this.localVideo = video)}></video>
+                <video autoPlay ref={video => (this.remoteVideo = video)}></video>
                 {this.renderFull()}
             </div>
         )
