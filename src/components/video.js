@@ -27,13 +27,8 @@ class Video extends React.Component{
             component.setState({ initiator: true})
         })
         socket.on('ready', ()=>{
-            if (!component.state.initiator){
-                this.getUserMedia().then(() => {
-                    component.enter()
-                })
-            }else{
-                component.enter()
-            }
+
+            component.enter()
             
         })
         socket.on('desc', (data) => {
