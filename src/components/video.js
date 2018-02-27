@@ -17,7 +17,7 @@ class Video extends React.Component{
 
     }
     componentDidMount(){
-        const socket = io('https://signaling.now.sh')
+        const socket = io(process.env.REACT_APP_SIGNALING_SERVER)
         const component = this
         this.setState({socket})
         this.getUserMedia().then(() => {
@@ -27,15 +27,12 @@ class Video extends React.Component{
             component.setState({ initiator: true})
         })
         socket.on('ready', ()=>{
-
             component.enter()
-            
         })
         socket.on('desc', (data) => {
             if (data.type ==='offer' && component.state.initiator) return
             if (data.type === 'answer' && !component.state.initiator) return
             component.call(data) 
-
         })
         socket.on('disconnected', () => {
             component.setState({ initiator: true })
@@ -48,7 +45,14 @@ class Video extends React.Component{
     getUserMedia(cb){
         return new Promise((resolve, reject) => {
             navigator.getUserMedia = navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-            navigator.getUserMedia({ video: true, audio: true }, stream => {
+            const op = {
+                video: {
+                    width: { min: 160, ideal: 640, max: 1280 },
+                    height: { min: 120, ideal: 360, max: 720 },
+                },
+                audio: true 
+            }
+            navigator.getUserMedia(op, stream => {
                 this.setState({ streamUrl: stream, localStream: stream })
                 this.localVideo.srcObject = stream
                 resolve()
@@ -77,14 +81,16 @@ class Video extends React.Component{
     }
     renderFull = () => {
         if(this.state.full){
-            return 'Sala cheia'
+            return 'The room is full'
         }
     }
     render(){
         return( 
-            <div>
-                <video autoPlay id="localVideo" muted ref={video => (this.localVideo = video)}></video>
-                <video autoPlay ref={video => (this.remoteVideo = video)}></video>
+            <div className="video-wrapper">
+                <div className="local-video-wrapper">
+                    <video autoPlay id="localVideo" muted ref={video => (this.localVideo = video)}></video>
+                </div>
+                <video autoPlay id="remoteVideo"  ref={video => (this.remoteVideo = video)}></video>
                 {this.renderFull()}
             </div>
         )

@@ -7,15 +7,15 @@ export default {
             initiator: initiator,
             stream: stream,
             trickle: false,
-            reconnectTimer: 100,
+            reconnectTimer: 1000,
             iceTransportPolicy: 'relay',
             config: {
                 iceServers: [
-                    { urls: ['stun:stun4.l.google.com:19302'] },
+                    { urls: process.env.REACT_APP_STUN_SERVERS.split(',') },
                     {
-                        urls: ['turn:numb.viagenie.ca'],
-                        credential: '12345678',
-                        username: 'hi@diegogurgel.com'
+                        urls: process.env.REACT_APP_TURN_SERVERS.split(','),
+                        username: process.env.REACT_APP_TURN_USERNAME,
+                        credential: process.env.REACT_APP_TURN_CREDENCIAL
                     },
                 ]
             }

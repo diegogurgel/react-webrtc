@@ -22,9 +22,7 @@ class App extends Component {
   }
   render() {
     return (
-      <div>
         <Video ref={ref => (this.video = ref)} updateId={this.updateId}/>
-      </div>
     )
   }
 }
