@@ -20,14 +20,15 @@ class Video extends React.Component{
         const socket = io(process.env.REACT_APP_SIGNALING_SERVER)
         const component = this
         this.setState({socket})
+        const { roomId } = this.props.match.params
         this.getUserMedia().then(() => {
-            socket.emit('join', { roomId: window.location.hash })
+            socket.emit('join', { roomId:roomId })
         })
         socket.on('init', ()=>{
             component.setState({ initiator: true})
         })
         socket.on('ready', ()=>{
-            component.enter()
+            component.enter(roomId)
         })
         socket.on('desc', (data) => {
             if (data.type ==='offer' && component.state.initiator) return
@@ -59,11 +60,11 @@ class Video extends React.Component{
             }, () => { }) 
         })
     }
-    enter = () => {
+    enter = (roomId) => {
         const peer = videoCall.init(this.state.localStream, this.state.initiator)
         peer.on('signal', data => {
             const signal = {
-                room: window.location.hash,
+                room: roomId,
                 desc: data
             }
             this.state.socket.emit('signal', signal)
