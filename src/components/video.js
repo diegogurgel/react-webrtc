@@ -1,5 +1,5 @@
 import React from 'react'
-import videoCall from '../helpers/simple-peer'
+import VideoCall from '../helpers/simple-peer'
 import '../styles/video.css'
 import io from 'socket.io-client'
 
@@ -16,6 +16,7 @@ class Video extends React.Component{
         }
 
     }
+    videoCall = new VideoCall()
     componentDidMount(){
         const socket = io(process.env.REACT_APP_SIGNALING_SERVER)
         const component = this
@@ -61,7 +62,7 @@ class Video extends React.Component{
         })
     }
     enter = (roomId) => {
-        const peer = videoCall.init(this.state.localStream, this.state.initiator)
+        const peer = this.videoCall.init(this.state.localStream, this.state.initiator)
         peer.on('signal', data => {
             const signal = {
                 room: roomId,
@@ -78,7 +79,7 @@ class Video extends React.Component{
 
     }
     call = (otherId) => {
-        videoCall.connect(otherId)
+        this.videoCall.connect(otherId)
     }
     renderFull = () => {
         if(this.state.full){

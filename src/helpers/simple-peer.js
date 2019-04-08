@@ -1,8 +1,8 @@
 import Peer from 'simple-peer'
 
-export default {
-    peer: null, 
-    init: (stream, initiator) => {
+export default class VideoCall {
+    peer = null 
+    init = (stream, initiator) => {
         this.peer = new Peer({
             initiator: initiator,
             stream: stream,
@@ -21,8 +21,8 @@ export default {
             }
         })
         return this.peer
-    },
-    connect: (otherId) => {
+    }
+    connect = (otherId) => {
         this.peer.signal(otherId)
     }  
 } 
