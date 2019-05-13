@@ -8,12 +8,13 @@
     "react-dom": "^16.8.6",
     "react-router-dom": "^4.2.2",
     "react-scripts": "2.1.8",
+    "shortid": "^2.2.14",
     "simple-peer": "^8.5.0",
     "socket.io": "^2.2.0",
     "socket.io-client": "^2.2.0"
   },
   "alias": [
-    "webrtc-iefabvdapg.now.sh"
+    "video-chat.now.sh"
   ],
   "scripts": {
     "start": "react-scripts start",

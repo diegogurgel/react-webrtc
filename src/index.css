@@ -9,7 +9,31 @@ body, html {
   display: flex;
   justify-content: center;
   align-content: center;
+  background: #252839;
 }
 .enter-room-container{
   margin: auto;
+  
+}
+.enter-room-container form{
+  display: flex;
+}
+.enter-room-container input{
+  height: 48px;
+  background: transparent;
+  color: #FFF;
+  font-size: 20px;
+  outline: none;
+  border:none;
+  border-bottom: 2px solid greenyellow;
+}
+.enter-room-container button {
+  background: greenyellow;
+  width: 100px;
+  border: none;
+  margin-left: 24px;
+  font-size: 20px;
+  color: #252839;
+  text-transform: uppercase;
+  font-weight: bold;
 }

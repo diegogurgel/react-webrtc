@@ -1,15 +1,22 @@
-import React from 'react'
+import React, { useState } from 'react'
+import shortId from 'shortid'
 
 const goToRoom = (history, roomId) => {
-  history.push(`/${roomId.current.value}`)
+  history.push(`/${roomId}`)
 }
 
+
 export function goToRoomInput({history}) {
-  let roomId = React.createRef();
+  let [roomId, setRoomId] = useState(shortId.generate());
+
   return (<div className="enter-room-container">
-          <input type="text" ref={roomId} placeholder="Room id"/>
+    <form>
+          <input type="text" value={roomId} placeholder="Room id" onChange={(event) => {
+            setRoomId(event.target.value)
+          }}/>
           <button onClick={() => {
             goToRoom(history, roomId)
           }}>Enter</button>
+          </form>
         </div>)
 }
