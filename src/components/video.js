@@ -2,6 +2,8 @@ import React from 'react'
 import VideoCall from '../helpers/simple-peer'
 import '../styles/video.css'
 import io from 'socket.io-client'
+import { getDisplayStream } from '../helpers/media-access';
+import ShareScreenIcon from './ShareScreenIcon';
 
 class Video extends React.Component {
   constructor() {
@@ -68,12 +70,27 @@ class Video extends React.Component {
       )
     })
   }
+  getDisplay(){
+    getDisplayStream().then(stream => {
+      stream.oninactive = () => {
+        this.state.peer.removeStream(this.state.localStream)  
+        this.getUserMedia().then(() => {
+          this.state.peer.addStream(this.state.localStream)  
+        })
+      }
+      this.setState({ streamUrl: stream, localStream: stream })
+      this.localVideo.srcObject = stream   
+      this.state.peer.addStream(stream)   
+    })
+  }
   enter = roomId => {
     this.setState({ connecting: true })
     const peer = this.videoCall.init(
       this.state.localStream,
       this.state.initiator
     )
+    this.setState({peer})
+    
     peer.on('signal', data => {
       const signal = {
         room: roomId,
@@ -116,6 +133,9 @@ class Video extends React.Component {
           id="remoteVideo"
           ref={video => (this.remoteVideo = video)}
         />
+        <button className="share-screen-btn" onClick={() => {
+          this.getDisplay()
+        }}><ShareScreenIcon/></button>
         {this.state.connecting && (
           <div className="status">
             <p>Establishing connection...</p>

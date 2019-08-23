@@ -30,6 +30,19 @@
   color: greenyellow;
   height: 100vh;
 }
+.share-screen-btn{
+  position: absolute;
+  bottom: 24px;
+  left: 24px;
+  background: transparent;
+  outline: none;
+  border: none;
+  box-shadow: 1px 1px 8px black;
+  border-radius: 50%;
+  background-color: #252839;
+  height: 64px;
+  width: 64px;
+}
 @media screen and (max-width: 480px) {
   .video-wrapper {
     position: relative;
