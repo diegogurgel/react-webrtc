@@ -4,7 +4,6 @@ import '../styles/video.css';
 import io from 'socket.io-client';
 import { getDisplayStream } from '../helpers/media-access';
 import ShareScreenIcon from './ShareScreenIcon';
-console.log(process.env);
 class Video extends React.Component {
   constructor() {
     super();
