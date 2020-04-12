@@ -3,7 +3,8 @@ import VideoCall from '../helpers/simple-peer';
 import '../styles/video.css';
 import io from 'socket.io-client';
 import { getDisplayStream } from '../helpers/media-access';
-import ShareScreenIcon from './ShareScreenIcon';
+import {ShareScreenIcon,MicOnIcon,MicOffIcon,CamOnIcon,CamOffIcon} from './Icons';
+
 class Video extends React.Component {
   constructor() {
     super();
@@ -15,10 +16,13 @@ class Video extends React.Component {
       peer: {},
       full: false,
       connecting: false,
-      waiting: true
+      waiting: true,
+      micState:true,
+      camState:true,
     };
   }
   videoCall = new VideoCall();
+
   componentDidMount() {
     const socket = io(process.env.REACT_APP_SIGNALING_SERVER);
     const component = this;
@@ -27,6 +31,7 @@ class Video extends React.Component {
     this.getUserMedia().then(() => {
       socket.emit('join', { roomId: roomId });
     });
+
     socket.on('init', () => {
       component.setState({ initiator: true });
     });
@@ -45,6 +50,8 @@ class Video extends React.Component {
       component.setState({ full: true });
     });
   }
+
+
   getUserMedia(cb) {
     return new Promise((resolve, reject) => {
       navigator.getUserMedia = navigator.getUserMedia =
@@ -69,6 +76,29 @@ class Video extends React.Component {
       );
     });
   }
+
+  setAudioLocal(){
+    if(this.state.localStream.getAudioTracks().length>0){
+      this.state.localStream.getAudioTracks().forEach(track => {
+        track.enabled=!track.enabled;
+      });
+    }
+    this.setState({
+      micState:!this.state.micState
+    })
+  }
+
+  setVideoLocal(){
+    if(this.state.localStream.getVideoTracks().length>0){
+      this.state.localStream.getVideoTracks().forEach(track => {
+        track.enabled=!track.enabled;
+      });
+    }
+    this.setState({
+      camState:!this.state.camState
+    })
+  }
+
   getDisplay() {
     getDisplayStream().then(stream => {
       stream.oninactive = () => {
@@ -82,6 +112,7 @@ class Video extends React.Component {
       this.state.peer.addStream(stream);
     });
   }
+
   enter = roomId => {
     this.setState({ connecting: true });
     const peer = this.videoCall.init(
@@ -105,6 +136,7 @@ class Video extends React.Component {
       console.log(err);
     });
   };
+
   call = otherId => {
     this.videoCall.connect(otherId);
   };
@@ -132,14 +164,51 @@ class Video extends React.Component {
           id='remoteVideo'
           ref={video => (this.remoteVideo = video)}
         />
+
+        <div className='controls'>
         <button
-          className='share-screen-btn'
+          className='control-btn'
           onClick={() => {
             this.getDisplay();
           }}
         >
           <ShareScreenIcon />
         </button>
+
+
+        <button
+        className='control-btn'
+          onClick={() => {
+            this.setAudioLocal();
+          }}
+        >
+          {
+            this.state.micState?(
+              <MicOnIcon></MicOnIcon>
+            ):(
+              <MicOffIcon></MicOffIcon>
+            )
+          }
+        </button>
+
+        <button
+        className='control-btn'
+          onClick={() => {
+            this.setVideoLocal();
+          }}
+        >
+          {
+            this.state.camState?(
+              <CamOnIcon></CamOnIcon>
+            ):(
+              <CamOffIcon></CamOffIcon>
+            )
+          }
+        </button>
+        </div>
+        
+
+
         {this.state.connecting && (
           <div className='status'>
             <p>Establishing connection...</p>
