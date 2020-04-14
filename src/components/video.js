@@ -184,9 +184,9 @@ class Video extends React.Component {
         >
           {
             this.state.micState?(
-              <MicOnIcon></MicOnIcon>
+              <MicOnIcon/>
             ):(
-              <MicOffIcon></MicOffIcon>
+              <MicOffIcon/>
             )
           }
         </button>
@@ -199,9 +199,9 @@ class Video extends React.Component {
         >
           {
             this.state.camState?(
-              <CamOnIcon></CamOnIcon>
+              <CamOnIcon/>
             ):(
-              <CamOffIcon></CamOffIcon>
+              <CamOffIcon/>
             )
           }
         </button>
