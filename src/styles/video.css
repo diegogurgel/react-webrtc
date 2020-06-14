@@ -13,12 +13,12 @@
   background: #252839;
   width: 100%;
 }
-#remoteVideo {
-  background: transparent;
-  margin: 0 auto;
-  display: block;
-  max-width: 100vw;
-  height: 100%;
+.remote-video {
+  height: 112px;
+  right: 0;
+  margin: 24px auto;
+  display: inline-block;
+  border-radius: 4px;
 }
 #remoteVideo.hide {
   display: none;

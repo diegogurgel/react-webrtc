@@ -3,7 +3,11 @@ import VideoCall from '../helpers/simple-peer';
 import '../styles/video.css';
 import io from 'socket.io-client';
 import { getDisplayStream } from '../helpers/media-access';
-import {ShareScreenIcon,MicOnIcon,MicOffIcon,CamOnIcon,CamOffIcon} from './Icons';
+import { ShareScreenIcon, MicOnIcon, MicOffIcon, CamOnIcon, CamOffIcon } from './Icons';
+import Peer from 'simple-peer'
+import VideoItem from "./videoItem"
+
+let userId = null
 
 class Video extends React.Component {
   constructor() {
@@ -14,11 +18,12 @@ class Video extends React.Component {
       streamUrl: '',
       initiator: false,
       peer: {},
-      full: false,
       connecting: false,
       waiting: true,
-      micState:true,
-      camState:true,
+      micState: true,
+      camState: true,
+      peers: {},
+      streams: {},
     };
   }
   videoCall = new VideoCall();
@@ -29,25 +34,88 @@ class Video extends React.Component {
     this.setState({ socket });
     const { roomId } = this.props.match.params;
     this.getUserMedia().then(() => {
-      socket.emit('join', { roomId: roomId });
+      socket.emit('join', { roomId });
+      console.log("socket.on join", roomId)
+
     });
 
-    socket.on('init', () => {
-      component.setState({ initiator: true });
+    socket.on('init', (data) => {
+
+      console.log("socket.on init", data)
+
+      userId = data.userId;
+      socket.emit('ready', { room: roomId, userId });
     });
-    socket.on('ready', () => {
-      component.enter(roomId);
-    });
-    socket.on('desc', data => {
-      if (data.type === 'offer' && component.state.initiator) return;
-      if (data.type === 'answer' && !component.state.initiator) return;
-      component.call(data);
-    });
+
+    socket.on("users", ({ initiator, users }) => {
+      console.log("socket.on  users", users)
+
+      Object.keys(users.sockets)
+        .filter(
+          sid =>
+            !this.state.peers[sid] && sid !== userId)
+        .forEach(sid => {
+          const peer = new Peer({
+            initiator: userId === initiator,
+            config: {
+              iceServers: [
+                { urls: process.env.REACT_APP_STUN_SERVERS.split(',') },
+                {
+                  urls: process.env.REACT_APP_TURN_SERVERS.split(','),
+                  username: process.env.REACT_APP_TURN_USERNAME,
+                  credential: process.env.REACT_APP_TURN_CREDENCIAL
+                },
+              ]
+            },
+            // Allow the peer to receive video, even if it's not sending stream:
+            // https://github.com/feross/simple-peer/issues/95
+            offerConstraints: {
+              offerToReceiveAudio: true,
+              offerToReceiveVideo: true,
+            },
+            stream: this.state.localStream,
+          })
+
+          peer.on('signal', data => {
+            console.log("peer.on  signal", users)
+
+            const signal = {
+              userId: sid,
+              signal: data
+            };
+
+            socket.emit('signal', signal);
+          });
+          peer.on('stream', stream => {
+            console.log("peer.on  stream", stream)
+
+            const streamsTemp = { ...this.state.streams }
+            streamsTemp[sid] = stream
+
+            this.setState({ streams: streamsTemp })
+          });
+          peer.on('error', function (err) {
+            console.log("peer.on  error", err)
+
+            console.log(err);
+          });
+
+          const peersTemp = { ...this.state.peers }
+          peersTemp[sid] = peer
+
+          this.setState({ peers: peersTemp })
+        })
+    })
+
+    socket.on('signal', ({ userId, signal }) => {
+      console.log("socket.on  signal userId", userId, "signal", signal)
+
+      const peer = this.state.peers[userId]
+      peer.signal(signal)
+    })
+
     socket.on('disconnected', () => {
       component.setState({ initiator: true });
-    });
-    socket.on('full', () => {
-      component.setState({ full: true });
     });
   }
 
@@ -72,80 +140,55 @@ class Video extends React.Component {
           this.localVideo.srcObject = stream;
           resolve();
         },
-        () => {}
+        () => { }
       );
     });
   }
 
-  setAudioLocal(){
-    if(this.state.localStream.getAudioTracks().length>0){
+  setAudioLocal() {
+    if (this.state.localStream.getAudioTracks().length > 0) {
       this.state.localStream.getAudioTracks().forEach(track => {
-        track.enabled=!track.enabled;
+        track.enabled = !track.enabled;
       });
     }
     this.setState({
-      micState:!this.state.micState
+      micState: !this.state.micState
     })
   }
 
-  setVideoLocal(){
-    if(this.state.localStream.getVideoTracks().length>0){
+  setVideoLocal() {
+    if (this.state.localStream.getVideoTracks().length > 0) {
       this.state.localStream.getVideoTracks().forEach(track => {
-        track.enabled=!track.enabled;
+        track.enabled = !track.enabled;
       });
     }
     this.setState({
-      camState:!this.state.camState
+      camState: !this.state.camState
     })
   }
 
   getDisplay() {
     getDisplayStream().then(stream => {
       stream.oninactive = () => {
-        this.state.peer.removeStream(this.state.localStream);
+        Object.keys(this.state.peers).forEach((key)=>{
+          this.state.peers[key].removeStream(this.state.localStream);
+        })
         this.getUserMedia().then(() => {
-          this.state.peer.addStream(this.state.localStream);
+          Object.keys(this.state.peers).forEach((key)=>{
+            this.state.peers[key].addStream(this.state.localStream);
+          })
         });
       };
       this.setState({ streamUrl: stream, localStream: stream });
       this.localVideo.srcObject = stream;
-      this.state.peer.addStream(stream);
+      Object.keys(this.state.peers).forEach((key)=>{
+        this.state.peers[key].addStream(this.state.localStream);
+      })
     });
   }
 
-  enter = roomId => {
-    this.setState({ connecting: true });
-    const peer = this.videoCall.init(
-      this.state.localStream,
-      this.state.initiator
-    );
-    this.setState({ peer });
-
-    peer.on('signal', data => {
-      const signal = {
-        room: roomId,
-        desc: data
-      };
-      this.state.socket.emit('signal', signal);
-    });
-    peer.on('stream', stream => {
-      this.remoteVideo.srcObject = stream;
-      this.setState({ connecting: false, waiting: false });
-    });
-    peer.on('error', function(err) {
-      console.log(err);
-    });
-  };
-
-  call = otherId => {
-    this.videoCall.connect(otherId);
-  };
-  renderFull = () => {
-    if (this.state.full) {
-      return 'The room is full';
-    }
-  };
   render() {
+
     return (
       <div className='video-wrapper'>
         <div className='local-video-wrapper'>
@@ -155,58 +198,60 @@ class Video extends React.Component {
             muted
             ref={video => (this.localVideo = video)}
           />
+          {
+            Object.keys(this.state.streams).map((key, id) => {
+              return <VideoItem
+                key={key}
+                userId={key}
+                stream={this.state.streams[key]}
+              />
+            })
+          }
         </div>
-        <video
-          autoPlay
-          className={`${
-            this.state.connecting || this.state.waiting ? 'hide' : ''
-          }`}
-          id='remoteVideo'
-          ref={video => (this.remoteVideo = video)}
-        />
+
 
         <div className='controls'>
-        <button
-          className='control-btn'
-          onClick={() => {
-            this.getDisplay();
-          }}
-        >
-          <ShareScreenIcon />
-        </button>
+          <button
+            className='control-btn'
+            onClick={() => {
+              this.getDisplay();
+            }}
+          >
+            <ShareScreenIcon />
+          </button>
 
 
-        <button
-        className='control-btn'
-          onClick={() => {
-            this.setAudioLocal();
-          }}
-        >
-          {
-            this.state.micState?(
-              <MicOnIcon/>
-            ):(
-              <MicOffIcon/>
-            )
-          }
-        </button>
+          <button
+            className='control-btn'
+            onClick={() => {
+              this.setAudioLocal();
+            }}
+          >
+            {
+              this.state.micState ? (
+                <MicOnIcon></MicOnIcon>
+              ) : (
+                  <MicOffIcon></MicOffIcon>
+                )
+            }
+          </button>
 
-        <button
-        className='control-btn'
-          onClick={() => {
-            this.setVideoLocal();
-          }}
-        >
-          {
-            this.state.camState?(
-              <CamOnIcon/>
-            ):(
-              <CamOffIcon/>
-            )
-          }
-        </button>
+          <button
+            className='control-btn'
+            onClick={() => {
+              this.setVideoLocal();
+            }}
+          >
+            {
+              this.state.camState ? (
+                <CamOnIcon></CamOnIcon>
+              ) : (
+                  <CamOffIcon></CamOffIcon>
+                )
+            }
+          </button>
         </div>
-        
+
 
 
         {this.state.connecting && (
@@ -219,7 +264,6 @@ class Video extends React.Component {
             <p>Waiting for someone...</p>
           </div>
         )}
-        {this.renderFull()}
       </div>
     );
   }
