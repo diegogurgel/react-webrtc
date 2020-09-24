@@ -1,7 +1,7 @@
 import Peer from 'simple-peer'
 
 export default class VideoCall {
-    peer = null 
+    peer = null
     init = (stream, initiator) => {
         this.peer = new Peer({
             initiator: initiator,
@@ -15,7 +15,7 @@ export default class VideoCall {
                     {
                         urls: process.env.REACT_APP_TURN_SERVERS.split(','),
                         username: process.env.REACT_APP_TURN_USERNAME,
-                        credential: process.env.REACT_APP_TURN_CREDENCIAL
+                        credential: process.env.REACT_APP_TURN_CREDENTIAL
                     },
                 ]
             }
@@ -24,5 +24,5 @@ export default class VideoCall {
     }
     connect = (otherId) => {
         this.peer.signal(otherId)
-    }  
+    }
 } 

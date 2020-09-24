@@ -4,6 +4,6 @@ declare namespace NodeJS {
     REACT_APP_STUN_SERVERS: string
     REACT_APP_TURN_SERVERS: string
     REACT_APP_TURN_USERNAME: string
-    REACT_APP_TURN_CREDENCIAL: string
+    REACT_APP_TURN_CREDENTIAL: string
   }
 }
