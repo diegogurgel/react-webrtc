@@ -1,4 +1,15 @@
 {
-  "version": 1,
-  "name": "nodejs"
+  "version": 2,
+  "builds": [
+      {
+          "src": "./server.js",
+          "use": "@now/next"
+      }
+  ],
+  "routes": [
+      {
+          "src": "/(.*)",
+          "dest": "/"
+      }
+  ]
 }
