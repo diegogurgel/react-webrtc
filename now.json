@@ -15,6 +15,6 @@
     "REACT_APP_STUN_SERVERS": "@webrtc-react-app_stun_servers",
     "REACT_APP_TURN_SERVERS": "@webrtc-react-app_turn_servers",
     "REACT_APP_TURN_USERNAME": "@webrtc-react-app_turn_username",
-    "REACT_APP_TURN_CREDENCIAL": "@webrtc-react-app_turn_credencial"
+    "REACT_APP_TURN_CREDENTIAL": "@webrtc-react-app_turn_credential"
   }
 }
